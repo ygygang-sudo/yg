@@ -8,10 +8,13 @@ import { WHITE_LIST, NOT_FOUND } from '../constants';
 
 export default function setupPermissionGuard(router: Router) {
   router.beforeEach(async (to, from, next) => {
+    console.log('权限守卫: 路由跳转', to.name, '从', from.name);
     const appStore = useAppStore();
     const userStore = useUserStore();
+    console.log('权限守卫: 当前用户角色', userStore.role);
     const Permission = usePermission();
     const permissionsAllow = Permission.accessRouter(to);
+    console.log('权限守卫: 权限检查结果', permissionsAllow, '路由权限要求', to.meta?.roles);
     if (appStore.menuFromServer) {
       // 针对来自服务端的菜单配置进行处理
       // Handle routing configuration from the server

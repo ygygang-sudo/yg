@@ -17,15 +17,14 @@ const useAppStore = defineStore('app', {
       return state.device;
     },
     appAsyncMenus(state: AppState): RouteRecordNormalized[] {
-      return state.serverMenu as unknown as RouteRecordNormalized[];
+      return (state.serverMenu || []) as unknown as RouteRecordNormalized[];
     },
   },
 
   actions: {
     // Update app settings
     updateSettings(partial: Partial<AppState>) {
-      // @ts-ignore-next-line
-      this.$patch(partial);
+      this.$patch(partial as any);
     },
 
     // Change theme color
@@ -52,8 +51,8 @@ const useAppStore = defineStore('app', {
           content: 'loading',
           closable: true,
         });
-        const { data } = await getMenuList();
-        this.serverMenu = data;
+        const response = await getMenuList();
+        this.serverMenu = response as any;
         notifyInstance = Notification.success({
           id: 'menuNotice',
           content: 'success',

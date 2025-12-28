@@ -19,7 +19,7 @@ const COMPANY: AppRouteRecordRaw = {
       meta: {
         locale: 'menu.company.list',
         requiresAuth: true,
-        roles: ['*'],
+        roles: ['admin', 'user'],
       },
     },
   ],

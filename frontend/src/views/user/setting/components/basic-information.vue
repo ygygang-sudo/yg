@@ -140,10 +140,12 @@
     profile: '',
   });
   const validate = async () => {
-    const res = await formRef.value?.validate();
-    if (!res) {
+    try {
+      await formRef.value?.validate();
       // do some thing
       // you also can use html-type to submit
+    } catch (error) {
+      // Validation failed
     }
   };
   const reset = async () => {

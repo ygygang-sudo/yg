@@ -1,4 +1,51 @@
-<script lang="tsx">
+<template>
+  <a-menu
+    :mode="topMenu ? 'horizontal' : 'vertical'"
+    v-model:collapsed="collapsed"
+    v-model:open-keys="openKeys"
+    :show-collapse-button="appStore.device !== 'mobile'"
+    :auto-open="false"
+    :selected-keys="selectedKey"
+    :auto-open-selected="true"
+    :level-indent="34"
+    style="height: 100%; width: 100%"
+    @collapse="setCollapse"
+  >
+    <template v-for="element in menuTree" :key="element.name">
+      <a-sub-menu
+        v-if="element?.children && element?.children.length !== 0"
+        :key="element?.name"
+      >
+        <template #icon>
+          <component v-if="element?.meta?.icon" :is="element?.meta?.icon" />
+        </template>
+        <template #title>{{ t(element?.meta?.locale || '') }}</template>
+        <a-menu-item
+          v-for="child in element.children"
+          :key="child.name"
+          @click="goto(child)"
+        >
+          <template #icon>
+            <component v-if="child?.meta?.icon" :is="child?.meta?.icon" />
+          </template>
+          {{ t(child?.meta?.locale || '') }}
+        </a-menu-item>
+      </a-sub-menu>
+      <a-menu-item
+        v-else
+        :key="element?.name"
+        @click="goto(element)"
+      >
+        <template #icon>
+          <component v-if="element?.meta?.icon" :is="element?.meta?.icon" />
+        </template>
+        {{ t(element?.meta?.locale || '') }}
+      </a-menu-item>
+    </template>
+  </a-menu>
+</template>
+
+<script lang="ts">
   import { defineComponent, ref, h, compile, computed } from 'vue';
   import { useI18n } from 'vue-i18n';
   import { useRoute, useRouter, RouteRecordRaw } from 'vue-router';
@@ -89,58 +136,20 @@
           appStore.updateSettings({ menuCollapse: val });
       };
 
-      const renderSubMenu = () => {
-        function travel(_route: RouteRecordRaw[], nodes = []) {
-          if (_route) {
-            _route.forEach((element) => {
-              // This is demo, modify nodes as needed
-              const icon = element?.meta?.icon
-                ? () => h(compile(`<${element?.meta?.icon}/>`))
-                : null;
-              const node =
-                element?.children && element?.children.length !== 0 ? (
-                  <a-sub-menu
-                    key={element?.name}
-                    v-slots={{
-                      icon,
-                      title: () => h(compile(t(element?.meta?.locale || ''))),
-                    }}
-                  >
-                    {travel(element?.children)}
-                  </a-sub-menu>
-                ) : (
-                  <a-menu-item
-                    key={element?.name}
-                    v-slots={{ icon }}
-                    onClick={() => goto(element)}
-                  >
-                    {t(element?.meta?.locale || '')}
-                  </a-menu-item>
-                );
-              nodes.push(node as never);
-            });
-          }
-          return nodes;
-        }
-        return travel(menuTree.value);
+      return {
+        t,
+        appStore,
+        router,
+        route,
+        menuTree,
+        collapsed,
+        topMenu,
+        openKeys,
+        selectedKey,
+        goto,
+        findMenuOpenKeys,
+        setCollapse
       };
-
-      return () => (
-        <a-menu
-          mode={topMenu.value ? 'horizontal' : 'vertical'}
-          v-model:collapsed={collapsed.value}
-          v-model:open-keys={openKeys.value}
-          show-collapse-button={appStore.device !== 'mobile'}
-          auto-open={false}
-          selected-keys={selectedKey.value}
-          auto-open-selected={true}
-          level-indent={34}
-          style="height: 100%;width:100%;"
-          onCollapse={setCollapse}
-        >
-          {renderSubMenu()}
-        </a-menu>
-      );
     },
   });
 </script>

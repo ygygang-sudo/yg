@@ -1,7 +1,6 @@
 // 调试脚本：检查登录过程中的状态变化
-const axios = require('axios');
-
-async function debugLogin() {
+// 使用ES模块导入，避免CommonJS的弃用警告
+import('axios').then(async ({ default: axios }) => {
   try {
     console.log('1. 发送登录请求...');
     const loginResponse = await axios.post('http://localhost:8000/api/user/login', 

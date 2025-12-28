@@ -61,7 +61,7 @@
         },
         series: {
           name: 'total',
-          data,
+          data: data.value,
           type: 'bar',
           barWidth: 7,
           itemStyle: {
@@ -99,7 +99,7 @@
         },
         series: [
           {
-            name: '2001',
+            name: '2021',
             data: data.value[0],
             type: 'line',
             showSymbol: false,
@@ -110,7 +110,7 @@
             },
           },
           {
-            name: '2002',
+            name: '2022',
             data: data.value[1],
             type: 'line',
             showSymbol: false,
@@ -163,7 +163,7 @@
             label: {
               show: false,
             },
-            data,
+            data: data.value,
           },
         ],
       };

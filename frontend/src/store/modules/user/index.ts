@@ -56,7 +56,16 @@ const useUserStore = defineStore('user', {
     },
     // Set user's information
     setInfo(partial: Partial<UserState>) {
-      this.$patch(partial);
+      console.log('设置用户信息前:', this.$state);
+      console.log('要设置的用户信息:', partial);
+      // 确保角色字段被正确设置
+      if (partial.role) {
+        this.role = partial.role;
+      }
+      // 使用$patch更新其他字段
+      const { role, ...otherFields } = partial;
+      this.$patch(otherFields);
+      console.log('设置用户信息后:', this.$state);
     },
 
     // Reset user's information
@@ -76,10 +85,13 @@ const useUserStore = defineStore('user', {
       try {
         const res = await userLogin(loginForm);
         console.log('登录API响应:', res);
+        console.log('登录API响应中的用户信息:', res.userInfo);
+        console.log('登录API响应中的用户角色:', res.userInfo?.role);
         setToken(res.token);
         console.log('设置token后，当前用户角色:', this.role);
         this.setInfo(res.userInfo);
         console.log('设置用户信息后，当前用户角色:', this.role);
+        console.log('设置用户信息后，完整的用户状态:', this.$state);
         // 登录响应已经包含完整的用户信息，无需再次调用info()
       } catch (err) {
         console.error('登录过程中出错:', err);

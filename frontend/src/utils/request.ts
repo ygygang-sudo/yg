@@ -41,8 +41,8 @@ request.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
     const { data } = response;
 
-    // 检查业务状态码
-    if (data.code === ResponseCode.SUCCESS) {
+    // 检查业务状态码 - 后端使用20000表示成功
+    if (data.code === 20000) {
       return data.data;
     }
 

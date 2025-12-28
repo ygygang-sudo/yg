@@ -100,9 +100,11 @@
   });
 
   const onNextClick = async () => {
-    const res = await formRef.value?.validate();
-    if (!res) {
+    try {
+      await formRef.value?.validate();
       emits('changeStep', 'forward', { ...formData.value });
+    } catch (error) {
+      // Validation failed
     }
   };
 </script>

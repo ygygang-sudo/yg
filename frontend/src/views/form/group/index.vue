@@ -258,13 +258,15 @@
   const formRef = ref<FormInstance>();
   const { loading, setLoading } = useLoading();
   const onSubmitClick = async () => {
-    const res = await formRef.value?.validate();
-    if (!res) {
+    try {
+      await formRef.value?.validate();
       setLoading(true);
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+    } catch (error) {
+      // Validation failed
     }
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
   };
 </script>
 

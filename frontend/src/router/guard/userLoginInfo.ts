@@ -8,7 +8,9 @@ export default function setupUserLoginInfoGuard(router: Router) {
   router.beforeEach(async (to, from, next) => {
     NProgress.start();
     const userStore = useUserStore();
+
     if (isLogin()) {
+      // 如果用户已经有角色信息（包括默认的'user'），直接放行
       if (userStore.role) {
         next();
       } else {
