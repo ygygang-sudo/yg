@@ -66,5 +66,13 @@ module.exports = {
     'no-param-reassign': 0,
     'prefer-regex-literals': 0,
     'import/no-extraneous-dependencies': 0,
+    // 针对TypeScript枚举的no-shadow规则配置
+    'no-shadow': 'off',
+    '@typescript-eslint/no-shadow': [
+      'error',
+      {
+        allow: ['ResponseCode'],
+      },
+    ],
   },
 };

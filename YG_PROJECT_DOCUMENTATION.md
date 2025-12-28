@@ -149,9 +149,8 @@ npm run dev
 
 ### 默认账户
 - 用户名: `admin` 密码: `admin123` (管理员)
-- 用户名: `demo` 密码: `demo123` (普通用户)
-- 用户名: `test` 密码: `test123` (测试用户)
-- 用户名: `root` 密码: `root123` (超级管理员)
+- 用户名: `user1` 密码: `password` (普通用户)
+- 用户名: `user2` 密码: `password` (普通用户)
 
 ## API接口文档
 
@@ -605,7 +604,7 @@ interface UserState {
   introduction?: string;      // 个人介绍
   personalWebsite?: string;   // 个人网站
   jobName?: string;           // 职位名称
-  organizationName?: string;  // 组织名称
+  companyName?: string;       // 公司名称
   locationName?: string;      // 位置名称
   phone?: string;             // 电话号码
   registrationDate?: string;  // 注册日期 (ISO格式)
@@ -616,6 +615,22 @@ interface UserState {
 
 type RoleType = 'root' | 'admin' | 'user' | 'company';
 ```
+
+### 前端公司状态 (CompanyState)
+
+```typescript
+interface CompanyState {
+  companyName: string;       // 公司名称
+  companyCode?: string;       // 公司编码
+  materialInfo?: MaterialInfo; // 物料信息
+  companyPhone?: string;      // 公司电话
+  warrantyYear?: number;       // 质保年
+  epsAccount?: string;        // 企业用户账号
+  epsPassword?: string;        // 企业用户密码
+  bankName?: string;          // 开户银行
+  bankAccount?: string;       // 银行账号
+  frameworkContractExpire?: string; // 框架合同到期时间 (ISO格式)
+}
 
 ### 后端用户模型 (User)
 
@@ -752,6 +767,104 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```bash
 VITE_API_BASE_URL=https://api.yourdomain.com
 VITE_APP_TITLE=YG应用
+```
+
+## 7. 公司状态管理
+
+### 7.1 公司状态数据结构
+
+#### 前端公司状态接口 (CompanyState)
+
+```typescript
+interface CompanyState {
+  companyName: string;       // 公司名称
+  companyCode?: string;      // 公司编码
+  materialInfo?: MaterialInfo; // 物料信息
+  companyPhone?: string;     // 公司电话
+  warrantyYear?: number;     // 质保年
+  epsAccount?: string;       // 企业用户账号
+  epsPassword?: string;      // 企业用户密码
+  bankName?: string;         // 开户银行
+  bankAccount?: string;      // 银行账号
+  frameworkContractExpire?: string; // 框架合同到期时间 (ISO格式)
+}
+
+interface MaterialInfo {
+  materialName?: string;     // 物料名称
+  materialCode?: string;     // 物料编码
+  specification?: string;    // 规格型号
+  unit?: string;            // 单位
+  price?: number;           // 价格
+  supplier?: string;        // 供应商
+}
+```
+
+#### 后端数据库模型
+- 公司状态表 (`company_states`) 与用户表 (`users`) 通过 `user_id` 字段关联
+- 支持一对多关系（一个用户可以关联多个公司状态）
+
+### 7.2 API接口
+
+#### 公司状态管理接口
+
+| 方法 | 路径 | 描述 | 认证 |
+|------|------|------|------|
+| GET | `/api/company/` | 获取所有公司状态 | 可选 |
+| GET | `/api/company/info/{id}` | 根据ID获取公司状态 | 可选 |
+| GET | `/api/company/name/{name}` | 根据公司名称获取 | 可选 |
+| GET | `/api/company/user-info/{user_id}` | 获取用户关联的公司状态 | 可选 |
+| POST | `/api/company/create` | 创建公司状态 | 需要 |
+| PUT | `/api/company/update/{id}` | 更新公司状态 | 需要 |
+| DELETE | `/api/company/{id}` | 删除公司状态 | 需要 |
+
+#### 响应格式
+```json
+{
+  "code": 20000,
+  "msg": "操作成功",
+  "data": {
+    "id": 1,
+    "companyName": "示例公司",
+    "companyCode": "COMP001",
+    "userId": 1,
+    "createdAt": "2024-01-01T00:00:00Z"
+  }
+}
+```
+
+### 7.3 使用示例
+
+#### 前端API调用
+```typescript
+import { createCompanyState, getCompanyStatesByUserId } from '@/api/company';
+
+// 创建公司状态
+const createCompany = async () => {
+  const response = await createCompanyState({
+    companyName: '我的公司',
+    companyCode: 'MYCOMP001',
+    userId: 1
+  });
+  
+  if (response.code === 20000) {
+    console.log('公司状态创建成功', response.data);
+  }
+};
+
+// 获取用户关联的公司状态
+const getUserCompanies = async (userId: number) => {
+  const response = await getCompanyStatesByUserId(userId);
+  return response.data;
+};
+```
+
+#### 用户状态扩展
+用户状态现在包含公司状态信息：
+```typescript
+interface UserState {
+  // ... 原有字段
+  companyState?: CompanyState;  // 关联的公司状态
+}
 ```
 
 ## 认证机制

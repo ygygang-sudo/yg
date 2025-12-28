@@ -39,7 +39,7 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
   (response: AxiosResponse) => {
     const res = response.data;
-    
+
     // 检查响应数据格式是否正确
     if (!res || typeof res !== 'object') {
       Message.error({
@@ -48,7 +48,7 @@ axios.interceptors.response.use(
       });
       return Promise.reject(new Error('服务器返回数据格式错误'));
     }
-    
+
     // 如果响应数据包含code字段，按业务状态码处理
     if (res.code !== undefined) {
       // if the custom code is not 20000, it is judged as an error.
@@ -79,7 +79,7 @@ axios.interceptors.response.use(
       }
       return res.data || res;
     }
-    
+
     // 如果响应数据不包含code字段，直接返回数据
     return res;
   },
@@ -87,7 +87,7 @@ axios.interceptors.response.use(
     // 网络错误处理
     if (error.response) {
       const { status, data } = error.response;
-      
+
       switch (status) {
         case 401:
           Message.error('未授权访问，请重新登录');
@@ -111,7 +111,7 @@ axios.interceptors.response.use(
     } else {
       Message.error('请求配置错误');
     }
-    
+
     return Promise.reject(error);
   }
 );

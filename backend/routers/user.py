@@ -8,6 +8,7 @@ from database.database import get_db
 from crud.user import authenticate_user, create_user, get_user_by_username, get_user_by_email
 from schemas.user import UserCreate, UserResponse, Token, LoginRequest
 from core.security import create_access_token, verify_token
+from core.response import success_response, error_response, unauthorized_error_response
 from config.settings import settings
 
 router = APIRouter(tags=["用户认证"])
@@ -43,15 +44,11 @@ def login_for_access_token(
     """用户登录"""
     user = authenticate_user(db, username, password)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="用户名或密码错误",
-        )
+        return unauthorized_error_response("用户名或密码错误")
+    
     if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="用户已被禁用"
-        )
+        return error_response(40000, "用户已被禁用")
+    
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
@@ -80,16 +77,7 @@ def login_for_access_token(
         }
     }
     
-    # 包装成前端期望的格式
-    frontend_response = {
-        "code": 20000,  # 前端期望的成功代码
-        "msg": "登录成功",
-        "data": response_data
-    }
-    
-    # 使用JSONResponse确保正确的JSON格式
-    from fastapi.responses import JSONResponse
-    return JSONResponse(content=frontend_response)
+    return success_response(response_data, "登录成功")
 
 
 @router.post("/register", response_model=UserResponse)
@@ -123,7 +111,7 @@ def logout(response: Response):
     """用户登出"""
     # 在实际应用中，这里可能需要处理令牌黑名单等逻辑
     # 目前简单返回成功消息
-    return {"message": "登出成功"}
+    return success_response({"message": "登出成功"}, "登出成功")
 
 
 @router.post("/info")
@@ -149,16 +137,7 @@ def get_user_info(current_user: UserResponse = Depends(get_current_user)):
         "role": current_user.role
     }
     
-    # 包装成前端期望的格式
-    frontend_response = {
-        "code": 20000,  # 前端期望的成功代码
-        "msg": "获取成功",
-        "data": response_data
-    }
-    
-    # 使用JSONResponse确保正确的JSON格式
-    from fastapi.responses import JSONResponse
-    return JSONResponse(content=frontend_response)
+    return success_response(response_data, "获取成功")
 
 
 @router.put("/profile")
@@ -197,10 +176,7 @@ def update_user_profile(
     updated_user = update_user(db, current_user.id, update_data)
     
     if not updated_user:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="更新用户信息失败"
-        )
+        return error_response(50000, "更新用户信息失败")
     
     # 返回更新后的用户信息
     response_data = {
@@ -222,10 +198,4 @@ def update_user_profile(
         "role": updated_user.role
     }
     
-    frontend_response = {
-        "code": 20000,
-        "msg": "更新成功",
-        "data": response_data
-    }
-    
-    return JSONResponse(content=frontend_response)
+    return success_response(response_data, "更新成功")

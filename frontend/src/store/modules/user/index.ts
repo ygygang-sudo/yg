@@ -3,11 +3,11 @@ import {
   login as userLogin,
   logout as userLogout,
   getUserInfo,
-  LoginData,
 } from '@/api/user';
+import type { LoginFormData } from '@/types/user';
 import { setToken, clearToken } from '@/utils/auth';
 import { removeRouteListener } from '@/utils/route-listener';
-import { UserState } from './types';
+import type { UserState } from './types';
 import useAppStore from '../app';
 
 const useUserStore = defineStore('user', {
@@ -27,7 +27,7 @@ const useUserStore = defineStore('user', {
     registrationDate: undefined,
     accountId: undefined,
     certification: undefined,
-    role: '',
+    role: 'user',
   }),
 
   getters: {
@@ -72,14 +72,17 @@ const useUserStore = defineStore('user', {
     },
 
     // Login
-    async login(loginForm: LoginData) {
+    async login(loginForm: LoginFormData) {
       try {
         const res = await userLogin(loginForm);
+        console.log('登录API响应:', res);
         setToken(res.token);
+        console.log('设置token后，当前用户角色:', this.role);
         this.setInfo(res.userInfo);
-        // 确保在登录成功后立即获取完整的用户信息，包括角色信息
-        await this.info();
+        console.log('设置用户信息后，当前用户角色:', this.role);
+        // 登录响应已经包含完整的用户信息，无需再次调用info()
       } catch (err) {
+        console.error('登录过程中出错:', err);
         clearToken();
         // 重新抛出错误，确保登录表单能够捕获并显示错误信息
         throw err;
